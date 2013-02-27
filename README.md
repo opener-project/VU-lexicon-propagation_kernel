@@ -122,8 +122,8 @@ With the verbose option, we will have three lexical entries, one for each word i
 
 Contact
 ------
-Ruben Izquierdo
-Vrije University of Amsterdam
-ruben.izquierdobevia@vu.nl
+* Ruben Izquierdo
+* Vrije University of Amsterdam
+* ruben.izquierdobevia@vu.nl
 
 
