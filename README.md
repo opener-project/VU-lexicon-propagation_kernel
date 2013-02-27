@@ -23,12 +23,12 @@ General Approach
 
 The general approach to generate a lexicon these are the required steps:
 
-1) Get the WordNet in LMF format for your language
-2) Generate/translate a list of seeds
-3) Create the list with the relations you want to use for the propagation
-4) Run the script propagate_wn.py to generate the CSV file
-5) Manually check the most frequent words of your language and modify that CSV file
-6) From the corrected CSV, with the from_csv_to_lmf.py script, generate the final LMF lexicon
+1. Get the WordNet in LMF format for your language
+2. Generate/translate a list of seeds
+3. Create the list with the relations you want to use for the propagation
+4. Run the script propagate_wn.py to generate the CSV file
+5. Manually check the most frequent words of your language and modify that CSV file
+6. From the corrected CSV, with the from_csv_to_lmf.py script, generate the final LMF lexicon
 
 
 Seed list
