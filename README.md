@@ -38,12 +38,12 @@ The seed list has to be stored in a file, wit a seed per line, with the format:
 synset/polarity/pos
 
 For instance:
-n_n-531677/negative/n
-n_n-531685/neutral/n
-n_n-531697/positive/n
-n_n-531759/negative/n
-n_n-531792/neutral/n
-n_n-531952/neutral/n
+n_n-531677/negative/n  
+n_n-531685/neutral/n  
+n_n-531697/positive/n  
+n_n-531759/negative/n  
+n_n-531792/neutral/n  
+n_n-531952/neutral/n  
 ......
 
 The seed list can be based also in sense identifiers instead of synset identifiers, but the use of synsets ids
