@@ -37,7 +37,7 @@ Seed list
 The seed list has to be stored in a file, wit a seed per line, with the format:
 synset/polarity/pos
 
-For instance:
+For instance:  
 n_n-531677/negative/n  
 n_n-531685/neutral/n  
 n_n-531697/positive/n  
@@ -62,12 +62,12 @@ with a weight of 0.3 (3*0.1). If the weight is negative, we will invert the pola
 of relations
 
 In our experiments, we have used the following configuration for the relations file with good results, so it could be a good
-idea to use also these relations addapted to your own labels in case they differ.
+idea to use also these relations addapted to your own labels in case they differ.  
 
-NEAR_SYNONYM 2
-NEAR_ANTONYM -2
-HAS_HYPONYM 1
-HAS_HYPERONYM 0.5
+NEAR_SYNONYM 2  
+NEAR_ANTONYM -2  
+HAS_HYPONYM 1  
+HAS_HYPERONYM 0.5  
 
 
 Script propagate_wn.py
@@ -79,19 +79,19 @@ $ python propagate_wn.py -h
 ````
 
 The options and parameters for this script are the following:
-  Required:
-    --wn=FILE file with wordnet in LMF format
-    --seed-list=FILE file with list of seeds with polarities
-    --relations=FILE file with relations and weights
-    --out=FILE file to store the results in CSV format
-    --seed-sense In case your seed list is based on senses and not synsets
+* Required:
+  *  --wn=FILE file with wordnet in LMF format
+  *  --seed-list=FILE file with list of seeds with polarities
+  *  --relations=FILE file with relations and weights
+  *  --out=FILE file to store the results in CSV format
+  *  --seed-sense In case your seed list is based on senses and not synsets
   
-  Optional:
-    --log=FILE Filename where store the log (default no log)
-    --out-lemmas To force the output at lemma level instead of synset (default is synsets)
-    --max-depth=INT Maximum depth in number of relations to expand each synset (default 5) 
+* Optional:
+  *  --log=FILE Filename where store the log (default no log)
+  *  --out-lemmas To force the output at lemma level instead of synset (default is synsets)
+  *  --max-depth=INT Maximum depth in number of relations to expand each synset (default 5) 
 	
-  Example:
+Example:
 ````shell
 $ python propagate_wn.py  --wn=cornetto.lmf.xml --seed-list=file_seeds.txt --relations=my_rels.txt --out my_output.csv
 ````
