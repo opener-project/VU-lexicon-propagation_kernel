@@ -92,9 +92,9 @@ The options and parameters for this script are the following:
     --max-depth=INT Maximum depth in number of relations to expand each synset (default 5) 
 	
   Example:
-    ````shell
-    python propagate_wn.py  --wn=cornetto.lmf.xml --seed-list=file_seeds.txt --relations=my_rels.txt --out my_output.csv
-    ````
+````shell
+$ python propagate_wn.py  --wn=cornetto.lmf.xml --seed-list=file_seeds.txt --relations=my_rels.txt --out my_output.csv
+````
     
     
 Script from_csv_to_lmf.py
