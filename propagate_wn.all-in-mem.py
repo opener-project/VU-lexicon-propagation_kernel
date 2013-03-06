@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 ########################
 # List of changes
@@ -12,10 +12,10 @@ import operator
 from collections import defaultdict
 import getopt
 from lxml import etree
-import os
-import glob
-import shutil
-import tempfile
+import cPickle
+
+
+
 
 from my_wordnet_lmf import My_wordnet
 from my_seeds import My_seeds
@@ -31,7 +31,7 @@ class My_synset:
     
   def compute_value(self,map_values):
     p = 1
-    for relation in self.chain_relations:
+    for relation,_ in self.chain_relations:
       value = map_values[relation]
       p = p * value
     self.value = p / len(self.chain_relations)
@@ -46,7 +46,7 @@ class My_synset:
     
   def resolve_synset(self,map_values):
     value = 1
-    for relation in self.chain_relations:
+    for relation,_ in self.chain_relations:
       value = value * map_values[relation]
     value = value / len(self.chain_relations)
     
@@ -60,8 +60,8 @@ class My_synset:
       
     ##Computing the chain
     final_chain = self.polarity
-    for rel in self.chain_relations:
-      final_chain += ' -> ' + rel
+    for rel, syn in self.chain_relations:
+      final_chain += ' -> ' + rel + ' -> ' + syn
     
     return final_pol,final_chain,value
 
@@ -179,15 +179,10 @@ if __name__ == '__main__':
   my_relations['direct'] = value_for_direct
   
   logging.debug('Max depth: '+str(max_depth))
-  
-  temp_folder = tempfile.mkdtemp()
-  logging.debug('Created temp folder '+temp_folder)
-
-  
-  
   ## STEP 1 Propagate seed polarity to synsets:
+  span_for_synset = {}
   for cnt, (synset, polarity, pos) in enumerate(my_seeds):
-        
+
     if cnt % max(1,int(5 * my_seeds.length() / 100)) == 0 :
       logging.debug('Processed '+str(cnt)+' seeds of '+str(my_seeds.length()))
     already_tagged = []
@@ -198,49 +193,46 @@ if __name__ == '__main__':
       synset = my_wn.sense_to_synset(synset)
     
     new_syn = My_synset(synset)
-    new_syn.set_polarity(polarity,['direct'])
+    new_syn.set_polarity(polarity,[('direct',synset)])
 
     already_tagged.append(new_syn)
     
     keep_looping = True
     while keep_looping:
-      #print>>sys.stderr,'\tTagged, visited:',len(already_tagged), len(already_visited)
       keep_looping = False
       for source_synset in already_tagged:
-        #print>>sys.stderr,'\t\tChecking',source_synset.id
         if source_synset.id not in already_visited:
-          #print>>sys.stderr,'\t\t\tExpanding it...'
           already_visited.add(source_synset.id)
           for relation in my_relations.keys():  ##For each relation type:
-            #print>>sys.stderr,'\t\t\t\tRelation: ',relation
+          
             ## Get the synset related through this relation
             targets_synset = my_wn.get_relateds_synset(source_synset.id,relation)  
             for target_synset in targets_synset:
-              #print>>sys.stderr,'\t\t\t\t\tTarget synset: ',target_synset
               new_chain_relation = source_synset.chain_relations[:]
-              new_chain_relation.append(relation)
+              new_chain_relation.append((relation,target_synset))
               new_synset = My_synset(target_synset)
               new_synset.set_polarity(source_synset.polarity,new_chain_relation)
               already_tagged.append(new_synset)
-              #print>>sys.stderr,'\t\t\t\t\t\tAdded to already tagged'
-              #print>>sys.stderr,'\t\t\t\t\t\tNew chain: ',new_chain_relation
               depth = len(new_chain_relation)
               if depth >= max_depth:
                 already_visited.add(target_synset)  ## For not explore it later...
-                #print>>sys.stderr,'\t\t\t\t\t\tAdded to already visited to not explode it because of maxdepth'
               else:
-                #print>>sys.stderr,'\t\t\t\t\t\tKeep looping set to True'
+                #logging.debug('Added for visiting later a synset with depth:'+str(len(new_chain_relation)))
                 keep_looping = True
     ## NEXT SEED
     
+    #filename = open('KK/'+synset+'.data','wb')
+    #cPickle.dump(already_tagged,filename)
+    #filename.close()
+
+    ## Accumulate all new synsets
     for synset in already_tagged:
-      filename = os.path.join(temp_folder,synset.id)
-      f = open(filename,'a')
-      f.write(synset.polarity+'\t'+'\t'.join(synset.chain_relations)+'\n')
-      f.close()
-    del already_tagged
-    del already_visited
-      
+      if synset.id in span_for_synset:
+        span_for_synset[synset.id].append(synset)
+      else:
+        span_for_synset[synset.id]=[synset]
+  ##End of all seeds
+  
   ## The final step is to resolve each synset with all the posible chains:
   log = None
   if log_file!=None:    log = codecs.open(log_file,'w',encoding='utf-8')
@@ -248,26 +240,10 @@ if __name__ == '__main__':
   final_solutions = {}
   best_overall_value = -1
   logging.debug('Resolving synsets')
-
-  total_synsets = len(glob.glob(os.path.join(temp_folder,'*')))
-  for cnt, filename in enumerate(glob.glob(os.path.join(temp_folder,'*'))):
+  for cnt,(synset_id, possible_chains) in enumerate(span_for_synset.items()):
     
-    ## Load all the info for the synset
-    synset_id = filename[filename.rfind('/')+1:]
-    f = open(filename)
-    possible_chains = []
-    for line in f:
-      fields = line.strip().split()
-      polarity = fields[0]
-      relations = fields[1:]
-      new_synset = My_synset(synset_id)
-      new_synset.set_polarity(polarity,relations)
-      possible_chains.append(new_synset)
-    f.close()
-      
-        
-    if cnt % max(int(10 * total_synsets / 100),1) == 0 :
-      logging.debug('Resolved '+str(cnt)+' synsets of '+str(total_synsets))
+    if cnt % max(int(10 * len(span_for_synset) / 100),1) == 0 :
+      logging.debug('Resolved '+str(cnt)+' synsets of '+str(len(span_for_synset)))
 
     if log!=None:
       print>>log,'Resolving synset :',synset_id
@@ -362,9 +338,6 @@ if __name__ == '__main__':
   logging.debug('Output in file '+out_file)
 
   if log!=None:
-    log.close()
-    
-    
-  shutil.rmtree(temp_folder)
-  logging.debug('Deleted temp folder '+temp_folder)
+    log.close()  
+  
         
