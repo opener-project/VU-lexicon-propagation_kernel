@@ -55,7 +55,7 @@ if __name__ == '__main__':
         my_lemmas = [lemmas[0]]
         
       for my_lemma in my_lemmas:
-        lex_ent = etree.Element('LexicalEntry',attrib={'id':'id_'+str(n),'partOfSpeech':'noun'})
+        lex_ent = etree.Element('LexicalEntry',attrib={'id':'id_'+str(n),'partOfSpeech':pos})
         n+=1
         my_lexicon.append(lex_ent)
         ## LEMMA

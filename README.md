@@ -119,6 +119,13 @@ If we create the LMF lexicon without the verbos option, there will be only one l
 n_n-526797 and the neutral polarity associated (The polarity actually is linked to the synset and not to the word).
 With the verbose option, we will have three lexical entries, one for each word in the synset, with the same information.
 
+This scripts generates LMF lexicons that comply with the DTD included in the repository (opener_lmf.dtd). If you want to check
+that the lexicon generate is really following the structure defined in the DTD, you can use the script validate.py:
+````shell
+$ cat lexicon.lmf | validate.py
+````
+
+You will get a message with the status of the validation, and the errors in case there is something wrong.
 
 Contact
 ------
