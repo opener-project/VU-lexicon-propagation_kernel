@@ -1,0 +1,53 @@
+<?xml encoding="UTF-8"?>
+<!--DTD Sentiment Lexicon OpeNER-->
+
+<!ELEMENT LexicalResource ( GlobalInformation, Lexicon ) >
+<!ELEMENT GlobalInformation EMPTY >
+<!ATTLIST GlobalInformation label CDATA #REQUIRED >
+<!ELEMENT Lexicon (  LexicalEntry+ ) >
+<!ATTLIST Lexicon label CDATA #REQUIRED >
+<!ATTLIST Lexicon language NMTOKEN #REQUIRED >
+<!ATTLIST Lexicon languageCoding CDATA #REQUIRED >
+<!ATTLIST Lexicon owner CDATA #IMPLIED >
+<!ATTLIST Lexicon description NMTOKEN #IMPLIED >
+
+
+<!ELEMENT LexicalEntry (Lemma,WordForms*, Sense)>  <!--one sense per LexicalEntry-->
+<!ATTLIST  LexicalEntry formType ( multi_word_unit |single_word_unit ) #IMPLIED  >
+<!ATTLIST  LexicalEntry partOfSpeech ( other | adj | adv | art | conj | noun | num | prep | pron | verb ) #IMPLIED  > 
+<!ATTLIST  LexicalEntry type ( polarityShifter | intensifier | weakener | contrastMarker  ) #IMPLIED  >
+<!ATTLIST  LexicalEntry id CDATA #REQUIRED >
+
+<!ELEMENT Lemma EMPTY >
+<!ATTLIST Lemma writtenForm CDATA #REQUIRED >
+<!ELEMENT WordForms ( WordForm+ ) >
+
+<!ELEMENT WordForm EMPTY >
+<!ATTLIST WordForm article CDATA #IMPLIED >
+<!ATTLIST WordForm grammaticalNumber ( plural | singular ) #IMPLIED >  <!-- noun -->
+<!ATTLIST WordForm writtenForm CDATA #REQUIRED >
+
+<!ELEMENT Sense (Confidence*, MonolingualExternalRefs,Sentiment*, Domain)> 
+
+<!ELEMENT MonolingualExternalRefs ( MonolingualExternalRef* ) >
+<!ELEMENT MonolingualExternalRef ( Meta? ) >
+<!ATTLIST MonolingualExternalRef externalReference  NMTOKEN #IMPLIED >
+<!ATTLIST MonolingualExternalRef externalSystem NMTOKEN #IMPLIED >
+<!ATTLIST MonolingualExternalRef relType CDATA  #IMPLIED >
+
+
+<!ELEMENT Sentiment EMPTY>
+<!ATTLIST Sentiment polarity ( positive | negative | neutral | both  ) #IMPLIED >
+<!ATTLIST Sentiment strength ( strong | weak | average  ) #IMPLIED  >
+<!ATTLIST Sentiment factual ( yes | no  ) #IMPLIED  >
+<!ATTLIST Sentiment type ( Speaker_Writer | Actor  ) #IMPLIED  >   <!-- refers to attitude holder-->
+<!ATTLIST Sentiment semantic_type CDATA #IMPLIED  >   <!--e.g. : emotion | moral_judgment | aesthetics-->
+
+<!ELEMENT Domain EMPTY>
+<!ATTLIST Domain topic  CDATA  #IMPLIED >  <!--! e.g. : hotel | books | cell_phone--> 
+<!ATTLIST Domain aspect (  NOISE | PARKING | RESTAURANT | VALUE_FOR_MONEY | BREAKFAST | SLEEPING_COMFORT | ROOM | BAR | CLEANLINESS | STAFF | SWIMMING_POOL | FACILITIES | LOCATION | INTERNET | BATHROOM)  #IMPLIED  >  <!-- word is identifier of given aspect -->
+<!ATTLIST Domain conditional (yes | no) #IMPLIED  >  <!-- polysemous sentiment: sentiment applies only when context words identify given aspect -->
+<!ELEMENT  Confidence EMPTY >
+<!ATTLIST Confidence method  (manual | automatic | semi-automatic) #IMPLIED >
+<!ATTLIST Confidence score  CDATA  #IMPLIED >
+

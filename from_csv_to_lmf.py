@@ -28,6 +28,10 @@ if __name__ == '__main__':
   my_global.set('label','Created with the standard propagation algorithm')
   my_root.append(my_global)
   my_lexicon = etree.Element('Lexicon')
+  my_lexicon.set('languageCoding','UTF-8')
+  my_lexicon.set('label','sentiment')
+  my_lexicon.set('language',"-")
+
   my_root.append(my_lexicon)
   n=0
   for line in sys.stdin:
@@ -51,17 +55,22 @@ if __name__ == '__main__':
         my_lemmas = [lemmas[0]]
         
       for my_lemma in my_lemmas:
-        lex_ent = etree.Element('LexicalEntry',attrib={'id':'id_'+str(n),'partOfSpeech':pos})
+        lex_ent = etree.Element('LexicalEntry',attrib={'id':'id_'+str(n),'partOfSpeech':'noun'})
         n+=1
         my_lexicon.append(lex_ent)
+        ## LEMMA
         l_obj = etree.Element('Lemma',attrib={'writtenForm':my_lemma})
         lex_ent.append(l_obj)
+        
+        #### SENSE
         sense = etree.Element('Sense')
-        sense.append(etree.Element('Sentiment',attrib={'polarity':polarity}))
+        sense.append(etree.Element('Confidence',attrib={'score':str(value)}))
         if synset != 'unknown':
-          sense.append(etree.Element('MonolingualExternalReference',attrib={'reference':str(synset)}))
-
-        lex_ent.append(etree.Element('Confidence',attrib={'value':str(value)}))
+          refs = etree.Element('MonolingualExternalRefs')
+          refs.append(etree.Element('MonolingualExternalRef',attrib={'externalReference':str(synset)}))
+          sense.append(refs)
+        sense.append(etree.Element('Sentiment',attrib={'polarity':polarity}))
+        sense.append(etree.Element('Domain'))
         lex_ent.append(sense)
 
   my_tree = etree.ElementTree(my_root)
