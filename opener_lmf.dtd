@@ -14,7 +14,7 @@
 
 <!ELEMENT LexicalEntry (Lemma,WordForms*, Sense)>  <!--one sense per LexicalEntry-->
 <!ATTLIST  LexicalEntry formType ( multi_word_unit |single_word_unit ) #IMPLIED  >
-<!ATTLIST  LexicalEntry partOfSpeech ( other | adj | adv | art | conj | noun | num | prep | pron | verb ) #IMPLIED  > 
+<!ATTLIST  LexicalEntry partOfSpeech ( other | adj | adv | art | conj | noun | properNoun | num | prep | pron | verb ) #IMPLIED  > 
 <!ATTLIST  LexicalEntry type ( polarityShifter | intensifier | weakener | contrastMarker  ) #IMPLIED  >
 <!ATTLIST  LexicalEntry id CDATA #REQUIRED >
 
