@@ -36,7 +36,7 @@ if __name__ == '__main__':
   n=0
   for line in sys.stdin:
     tokens = line.decode('utf-8').strip().split(';')
-    if len(tokens)!=5:
+    if len(tokens)!=6:
       print>>sys.stderr,'Skipped line because has not the correct format'
     else:
       synset = tokens[0]
@@ -47,6 +47,7 @@ if __name__ == '__main__':
       except:
         value=-1
       lemmas = tokens[4].split(',')
+      freq = tokens[5]
       
       my_lemmas = []
       if verbose:
@@ -64,11 +65,16 @@ if __name__ == '__main__':
         
         #### SENSE
         sense = etree.Element('Sense')
-        sense.append(etree.Element('Confidence',attrib={'score':str(value)}))
+        if freq=='-1':
+          method = 'automatic'
+        else:
+          method = 'manual'
+          value = '1'
+        sense.append(etree.Element('Confidence',attrib={'score':str(value),'method':method}))
+        refs = etree.Element('MonolingualExternalRefs')
         if synset != 'unknown':
-          refs = etree.Element('MonolingualExternalRefs')
           refs.append(etree.Element('MonolingualExternalRef',attrib={'externalReference':str(synset)}))
-          sense.append(refs)
+        sense.append(refs)
         sense.append(etree.Element('Sentiment',attrib={'polarity':polarity}))
         sense.append(etree.Element('Domain'))
         lex_ent.append(sense)

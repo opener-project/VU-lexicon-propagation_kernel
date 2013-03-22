@@ -318,8 +318,8 @@ if __name__ == '__main__':
       
 
   ## End, just print the results
-  if best_overall_value > value_for_direct:
-    best_overall_value = value_for_direct
+  #if best_overall_value > value_for_direct:
+  #  best_overall_value = value_for_direct
     
     
   #The output should be 
@@ -327,32 +327,44 @@ if __name__ == '__main__':
   
   f = codecs.open(out_file,'w','utf-8')
 
+  
+  data = []
+  max = -1
   if output_lemmas:
     
-    print>>log,'Calculating polarity for lemmas'
+    if log: print>>log,'Calculating polarity for lemmas'
     
     for n,(lemma, synsets) in enumerate(my_wn.get_lemma_synsets()):     
       
-      print>>log,'\tResolving',lemma
+      if log: print>>log,'\tResolving',lemma.encode('utf-8')
       sol = defaultdict(float)
       for s in synsets:
         pol,val = final_solutions.get(s,[None,None])
-        print>>log,'\t\t ',s, pol,'=',val
+        if log: print>>log,'\t\t ',s, pol,'=',val
         if pol is not None:
           sol[pol]+=val
           
       if len(sol)!=0:
         final_pol, final_val = sorted(sol.items(),key=operator.itemgetter(1),reverse=True)[0]
         pos = my_wn.get_pos_for_synset(synsets[0])
-        print>>f,'unknown;'+pos+';'+final_pol+';'+str(final_val)+';'+lemma
+        if final_val > max: 
+          max = final_val
+        data.append(('unknown',pos,final_pol,final_val,lemma))
+        #print>>f,'unknown;'+pos+';'+final_pol+';'+str(final_val)+';'+str(best_overall_value)+';'+str(final_val*1.0/best_overall_value)+';'+lemma+';-1'
 
   else:
     
     n = 0 
     for synset, (polarity, value) in final_solutions.items():
       pos=my_wn.get_pos_for_synset(synset)
-      print>>f, synset+';'+pos+';'+polarity+';'+str(min(1,value/best_overall_value))+';'+','.join(my_wn.lemmas_for_synset.get(synset,[]))
-    f.close()
+      if value>=max: max=value
+      data.append((synset,pos,polarity,value,','.join(my_wn.lemmas_for_synset.get(synset,[]))))
+#      print>>f, synset+';'+pos+';'+polarity+';'+str(value/best_overall_value)+';'+','.join(my_wn.lemmas_for_synset.get(synset,[]))+';-1'
+  
+  
+  for synset,pos,pol,value,lemmas in data:
+    print>>f,synset+';'+pos+';'+pol+';'+str(value/max)+';'+lemmas+';-1'
+  f.close()
     
 
          
