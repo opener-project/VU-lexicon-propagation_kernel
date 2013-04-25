@@ -8,7 +8,12 @@ if __name__ == '__main__':
     print>>sys.stderr,'Input stream required.'
     print>>sys.stderr,'Example usage: cat my_lexicon.utf8.csv |',sys.argv[0],'-verbose'
     print>>sys.stderr,'\t-verbose option to generate the lexicon with all the lemmas for one synset'
-    print>>sys.stderr,'\tInput file format: synset;polarity;value;lemma1,lemma2,lemma3'
+    print>>sys.stderr,'\tInput file format: synset;polarity;value;lemma1,lemma2,lemma3  OR'
+    print>>sys.stderr,'\tInput file format: synset;polarity;value;lemma1,lemma2,lemma3;sentiment_modifier (intensifier,shifter...)'
+    print>>sys.stderr,'''\nIn case you ran the propagate_wn.py with the output lemmas option the CSV file
+can contain 2 types of lines:'''
+    print>>sys.stderr,'\tInput file format: unknown;polarity;value;lemma OR'
+    print>>sys.stderr,'\tInput file format: unknown;polarity;value;lemma;modifier'
     print>>sys.stderr
     print>>sys.stderr
     sys.exit(-1)
@@ -36,7 +41,7 @@ if __name__ == '__main__':
   n=0
   for line in sys.stdin:
     tokens = line.decode('utf-8').strip().split(';')
-    if len(tokens)!=6:
+    if len(tokens)!=6 and len(tokens)!=7:
       print>>sys.stderr,'Skipped line because has not the correct format'
     else:
       synset = tokens[0]
@@ -55,8 +60,16 @@ if __name__ == '__main__':
       else:
         my_lemmas = [lemmas[0]]
         
+      if len(tokens) == 7:
+        modifier = tokens[6]
+      else:
+        modifier = None
+        
       for my_lemma in my_lemmas:
-        lex_ent = etree.Element('LexicalEntry',attrib={'id':'id_'+str(n),'partOfSpeech':pos})
+        if modifier is None:
+          lex_ent = etree.Element('LexicalEntry',attrib={'id':'id_'+str(n),'partOfSpeech':pos})
+        else:
+          lex_ent = etree.Element('LexicalEntry',attrib={'id':'id_'+str(n),'partOfSpeech':pos,'type':modifier})
         n+=1
         my_lexicon.append(lex_ent)
         ## LEMMA
@@ -65,7 +78,10 @@ if __name__ == '__main__':
         
         #### SENSE
         sense = etree.Element('Sense')
-        if freq=='-1':
+        if modifier is not None:
+          method = 'manual'
+          value ='1'
+        elif freq=='-1':
           method = 'automatic'
         else:
           method = 'manual'
@@ -75,7 +91,10 @@ if __name__ == '__main__':
         if synset != 'unknown':
           refs.append(etree.Element('MonolingualExternalRef',attrib={'externalReference':str(synset)}))
         sense.append(refs)
-        sense.append(etree.Element('Sentiment',attrib={'polarity':polarity}))
+        if modifier is None:
+          sense.append(etree.Element('Sentiment',attrib={'polarity':polarity}))
+        else:
+          sense.append(etree.Element('Sentiment'))
         sense.append(etree.Element('Domain'))
         lex_ent.append(sense)
 

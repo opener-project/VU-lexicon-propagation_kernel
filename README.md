@@ -96,6 +96,7 @@ Example:
 $ python propagate_wn.py  --wn=cornetto.lmf.xml --seed-list=file_seeds.txt --relations=my_rels.txt --out my_output.csv
 ````
     
+
     
 Script from_csv_to_lmf.py
 ------------------------
@@ -119,13 +120,27 @@ If we create the LMF lexicon without the verbos option, there will be only one l
 n_n-526797 and the neutral polarity associated (The polarity actually is linked to the synset and not to the word).
 With the verbose option, we will have three lexical entries, one for each word in the synset, with the same information.
 
+
 This scripts generates LMF lexicons that comply with the DTD included in the repository (opener_lmf.dtd). If you want to check
 that the lexicon generate is really following the structure defined in the DTD, you can use the script validate.py:
 ````shell
 $ cat lexicon.lmf | validate.py
 ````
-
 You will get a message with the status of the validation, and the errors in case there is something wrong.
+
+Sentiment modifiers
+------------------
+The previous script from_csv_to_lmf.py also consider that the input CSV can contain sentiment modifiers like polarity
+shifters, intensifiers or weakeners, so all this information will be stored in the final LMF lexicon.
+To incorporate this information to the CSV files, we should include one extra line for each modifier, with the following
+information and format:
+````shell
+unknown;ADV;neutral;1;very;-1;intensifier
+````
+So the format is the same as for polarity words, but with one extra field at the end containing the modifier for the word.
+In this case the synset(unknown), the polarity(neutral) and the score(1) specified in the CSV will not be used in the LMF,
+and the lexical entry will appear as a manual annotation.
+
 
 Contact
 ------
