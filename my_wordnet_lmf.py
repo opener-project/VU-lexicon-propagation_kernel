@@ -9,6 +9,7 @@ class My_wordnet:
     self.sense_to_synset_map = {}   ## ['sense'] --> 'synset'
     self.synset_rels = {}       ## ['(synset',pos)] --> {} ==> ['relation'] --> ['target_synset']
     self.pos_for_synset = {}
+    self.pos_for_lemma = {}
     
     self.senses_for_lemma = {}  ## ['lemma'] --> set(s1, s2, s3) 
     
@@ -74,7 +75,9 @@ class My_wordnet:
       
     ## Loading mappings from sense to synset
     for lexical_entry in tree.findall('Lexicon/LexicalEntry'):
-      lemma = lexical_entry.findall('Lemma')[0].get('writtenForm','')
+      lemma_obj = lexical_entry.findall('Lemma')[0]
+      lemma = lemma_obj.get('writtenForm','')
+      self.pos_for_lemma[lemma] = lemma_obj.get('partOfSpeech','NoGiven')
       self.senses_for_lemma[lemma] = set()
       
       for sense_ele in lexical_entry.findall('Sense'):        

@@ -6,6 +6,10 @@ There are two main scripts to generate a lexicon:
 1) propagate_wn.py --> this script propagates a list of seeds over WordNet and generates and intermediate CSV format
 2) from_csv_to_lmf.py --> this script reads the previous CSV format and generates the final Opener-LMF lexicon
 
+Some other scripts are included in the repository:
+1) csv_from_synset_to_lemma.py --> transforms a synset-based CSV into a lemma-based CSV lexicon
+2) validate.py --> validate a LMF lexicon against the opener_lmf.dtd DTD
+
 
 Installation and requirements
 -----------------------------
@@ -27,6 +31,7 @@ The general approach to generate a lexicon these are the required steps:
 2. Generate/translate a list of seeds
 3. Create the list with the relations you want to use for the propagation
 4. Run the script propagate_wn.py to generate the CSV file
+5. Optionally convert the synset-based CSV file into a lemma-based CSV file with the script (csv_from_synset_to_lemma.py)
 5. Manually check the most frequent words of your language and modify that CSV file
 6. From the corrected CSV, with the from_csv_to_lmf.py script, generate the final LMF lexicon
 
@@ -88,7 +93,6 @@ The options and parameters for this script are the following:
   
 * Optional:
   *  --log=FILE Filename where store the log (default no log)
-  *  --out-lemmas To force the output at lemma level instead of synset (default is synsets)
   *  --max-depth=INT Maximum depth in number of relations to expand each synset (default 5) 
 	
 Example:
@@ -96,6 +100,21 @@ Example:
 $ python propagate_wn.py  --wn=cornetto.lmf.xml --seed-list=file_seeds.txt --relations=my_rels.txt --out my_output.csv
 ````
     
+    
+Script csv_from_synset_to_lemma.py
+----------------------------------
+This script reads the synset based CSV and generates the a CSV based on lemmas. For this, the different polarities assigned
+to each synset for a specific lemma are collected and some heuristic is applied to generate an accumulated. Two heuristics
+have been implemented:
+
+* Average: the average for each polarity is obtained using the confidence for each synset of the lemma
+* Most confidence: the polarity with a higher confidence is assigned
+
+This script reads from the standard input and writes to the standard output, and also generates some log information
+on the error output, so for calling it from the command line:
+````shell
+$ cat polarities-synset.csv | python csv_from_synset_to_lemma.py > polarities-lemma.csv 2> polarities-lemma.log
+````
 
     
 Script from_csv_to_lmf.py

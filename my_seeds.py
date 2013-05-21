@@ -5,6 +5,7 @@ import codecs
 class My_seeds:
   def __init__(self,filename):
     self.seeds = []  ## (sense, polarity, pos)
+    self.map = {}
     try:
       f = codecs.open(filename,encoding='utf-8')
     except Exception as e:
@@ -19,6 +20,7 @@ class My_seeds:
       else:
         sense,polarity,pos = tokens
         self.seeds.append((sense,polarity,pos))
+        self.map[sense]=polarity
     f.close()
     logging.debug('Loaded '+str(len(self.seeds))+' seeds')
     
@@ -28,3 +30,6 @@ class My_seeds:
       
   def length(self):
     return len(self.seeds)
+    
+  def get_polarity(self,synset):
+    return self.map.get(synset,None)
