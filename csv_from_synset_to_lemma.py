@@ -60,7 +60,11 @@ if __name__ == '__main__':
     for (lemma,pos),polarities in polarities_for_lemma.items():
         #pol,conf = solve_by_average(polarities)
         pol, conf = solve_by_max(polarities)
-        print 'unknown;'+pos+';'+pol+';'+str(conf)+';'+lemma+';-1'
+        if float(conf) >= 0.9999: 
+          my_freq='1'
+        else: 
+          my_freq='-1'
+        print 'unknown;'+pos+';'+pol+';'+str(conf)+';'+lemma+';'+my_freq
         print>>sys.stderr,'#'*20
         print>>sys.stderr,'Resolving ',lemma,pos,'   Assigned polarity ',pol,'with AVG conf: ',conf
         for p,c in polarities:
