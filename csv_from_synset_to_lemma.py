@@ -27,10 +27,18 @@ def solve_by_average(list_polarities):
     
     
 def solve_by_max(list_polarities):
+    max_for_pol = {}
+    for pol,val in list_polarities:
+        if pol not in max_for_pol or val>max_for_pol[pol]:
+            max_for_pol[pol] = val
+    
+    del list_polarities
+    list_polarities = max_for_pol.items()
+    
     list_polarities.sort(key=itemgetter(1),reverse=True)
     best_value = list_polarities[0][1]
     tied = sum(1 for pol,val in list_polarities if val==best_value)
-    
+        
     if tied == 1:
         return list_polarities[0]
     elif tied == 2:
