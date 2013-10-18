@@ -50,7 +50,40 @@ def solve_by_max(list_polarities):
     else:
         return list_polarities[0]
     
+def majority(list_polarities):
+    count = defaultdict(int)
+    accum = defaultdict(float)
+    for pol,conf in list_polarities:
+        count[pol] += 1
+        accum[pol] += float(conf)
+
+    list_counts = count.items()
+    list_counts.sort(key=itemgetter(1),reverse=1)
+    if len(list_counts) == 1:
+        pol = list_counts[0][0]
+        conf = accum[pol]/list_counts[0][1]
+        return pol, conf
+    else:
+        if list_counts[0][1] == list_counts[1][1]:
+            pol = 'neutral'
+            conf = accum[list_counts[0][0]]/count[list_counts[0][0]]
+            return pol, conf
+        else:
+            pol = list_counts[0][0]
+            conf = accum[pol] / list_counts[0][1]
+            return pol, conf
+  
+  
 if __name__ == '__main__':
+    
+    if len(sys.argv) == 1:
+        print>>sys.stderr,'Specify the type of conversion required:'
+        print>>sys.stderr,sys.argv[0],' -max --> for selecting the polarity with maximum confidence'
+        print>>sys.stderr,sys.argv[0],' -avg --> for selecting the polarity with greater average confidence'
+        print>>sys.stderr,sys.argv[0],' -maj --> for selecting the polarity with greater average confidence'
+        sys.exit(-1)
+        
+    type_of_solving = sys.argv[1]
     
     polarities_for_lemma = {}
     for line in sys.stdin:
@@ -66,8 +99,15 @@ if __name__ == '__main__':
                 polarities_for_lemma[(lemma,pos)]=[(polarity,confidence)]
 
     for (lemma,pos),polarities in polarities_for_lemma.items():
-        #pol,conf = solve_by_average(polarities)
-        pol, conf = solve_by_max(polarities)
+        if type_of_solving == '-max':
+            pol, conf = solve_by_max(polarities)
+        elif type_of_solving == '-avg':
+            pol,conf = solve_by_average(polarities)
+        elif type_of_solving == '-maj':
+            pol,conf = majority(polarities)
+        else:
+            pol, conf = solve_by_max(polarities)
+            
         if float(conf) >= 0.9999: 
           my_freq='1'
         else: 

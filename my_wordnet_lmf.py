@@ -45,7 +45,13 @@ class My_wordnet:
     reverse_rels = []
     for synset_ele in tree.findall('Lexicon/Synset'):
       synset_id = synset_ele.get('id')
-      pos = synset_ele.get('partOfSpeech','NotGiven')
+      
+      pos = synset_ele.get('partOfSpeech',None)
+      if pos is None:
+        if synset_id[-2]=='-':
+          pos = synset_id[-1]
+        else:
+          pos = 'NotGiven'
       self.pos_for_synset[synset_id]=pos
        
       self.possible_pos.add(pos)

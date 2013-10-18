@@ -15,10 +15,10 @@ class My_seeds:
       
     for line in f:
       tokens = line.strip().split('/')
-      if len(tokens) != 3:
+      if len(tokens) < 3:
         logging.debug('Skipping line '+line+' . Specify sense/polarity/pos')
       else:
-        sense,polarity,pos = tokens
+        sense,polarity,pos = tokens[0:3]
         self.seeds.append((sense,polarity,pos))
         self.map[sense]=polarity
     f.close()

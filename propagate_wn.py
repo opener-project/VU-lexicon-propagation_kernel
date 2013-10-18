@@ -29,6 +29,7 @@ def get_training_test(list_of_seeds, num_folds):
 	synsets_for_polarity = {}
 	fic = open(list_of_seeds, 'r')
 	for line in fic:
+		print line
 		synset_id, polarity, pos = line.strip().split('/')
 		if polarity not in synsets_for_polarity:
 			synsets_for_polarity[polarity] = []
@@ -161,8 +162,9 @@ def propagate_list(my_wn, seed_list_file, relations_file, log_file, out_file, se
 	
 	
 	# # STEP 1 Propagate seed polarity to synsets:
+	pos_from_seeds = {}
 	for cnt, (synset, polarity, pos) in enumerate(my_seeds):
-				
+		pos_from_seeds[synset] = pos	
 		if cnt % max(1, int(5 * my_seeds.length() / 100)) == 0 :
 			logging.debug('Processed ' + str(cnt) + ' seeds of ' + str(my_seeds.length()))
 		already_tagged = []
@@ -295,7 +297,14 @@ def propagate_list(my_wn, seed_list_file, relations_file, log_file, out_file, se
 	
 	# Generating the output at synset level
 	for synset, (polarity, value) in final_solutions.items():
-		pos = my_wn.get_pos_for_synset(synset)
+		if len(synset)>4 and synset[1]=='_' and synset[3]=='-':
+			pos = synset[2]
+		elif synset[-2] == '-' and synset[3]=='-': ## spa-30-00069879-v
+			pos = synset[-1]
+		elif synset in pos_from_seeds:
+			pos = pos_from_seeds[synset]
+		else:
+			pos = my_wn.get_pos_for_synset(synset)
 		lemmas_for_synset = my_wn.lemmas_for_synset.get(synset, [])					
 		if value >= maxim:
 			maxim = value
@@ -549,7 +558,7 @@ if __name__ == '__main__':
 			logging.debug('Output file:' + output_file.name)
 			logging.debug('len out ' + str(len(system_out)))
 			
-			if True:  # Mapping synsets to lemmas for do lemma-based evaluation
+			if False:  # Mapping synsets to lemmas for do lemma-based evaluation
 				list_test = map_gold_to_lemma(list_test,my_wn)  # Mapping to lemma
 				system_out = map_system_to_lemma(system_out)
 
