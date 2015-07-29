@@ -29,8 +29,10 @@ def get_training_test(list_of_seeds, num_folds):
 	synsets_for_polarity = {}
 	fic = open(list_of_seeds, 'r')
 	for line in fic:
-		print line
-		synset_id, polarity, pos = line.strip().split('/')
+		fields = line.strip().split('/')
+		synset_id = fields[0]
+		polarity = fields[1]
+		pos = fields[2]
 		if polarity not in synsets_for_polarity:
 			synsets_for_polarity[polarity] = []
 		synsets_for_polarity[polarity].append((synset_id, pos))
@@ -188,7 +190,12 @@ def propagate_list(my_wn, seed_list_file, relations_file, log_file, out_file, se
 					for relation in my_relations.keys():  # #For each relation type:
 						# # Get the synset related through this relation
 						targets_synset = my_wn.get_relateds_synset(source_synset.id, relation)	
+						print 'Source',source_synset.id,
+						print 'rel:',relation
+						print 'targets',targets_synset
 						for target_synset in targets_synset:
+							if len(target_synset) == 0:
+								continue
 							new_chain_relation = source_synset.chain_relations[:]
 							new_chain_relation.append(relation + '#' + target_synset)
 							new_synset = My_synset(target_synset)
@@ -204,7 +211,7 @@ def propagate_list(my_wn, seed_list_file, relations_file, log_file, out_file, se
 		for synset in already_tagged:
 			filename = os.path.join(temp_folder, synset.id)
 			f = open(filename, 'a')
-			f.write(synset.polarity + '\t' + '\t'.join(synset.chain_relations) + '\n')
+			f.write(synset.polarity.encode('utf-8') + '\t' + ('\t'.join(synset.chain_relations)).encode('utf-8') + '\n')
 			f.close()
 		del already_tagged
 		del already_visited
@@ -244,7 +251,7 @@ def propagate_list(my_wn, seed_list_file, relations_file, log_file, out_file, se
 		if cnt % max(int(10 * total_synsets / 100), 1) == 0 :
 			logging.debug('Resolved ' + str(cnt) + ' synsets of ' + str(total_synsets))
 
-		if log != None: print >> log, 'Resolving synset :', synset_id
+		if log != None: print >> log, 'Resolving synset :', synset_id.decode('utf-8')
 		
 		options_for_synset = []
 		for my_synset in possible_chains:
@@ -256,7 +263,7 @@ def propagate_list(my_wn, seed_list_file, relations_file, log_file, out_file, se
 			for fp, fc, fv in options_for_synset:
 				print >> log, '	Pol:', fp
 				print >> log, '	Val:', fv
-				print >> log, '	Rel:', fc
+				print >> log, '	Rel:', fc.decode('utf-8')
 				print >> log, '	' + '=' * 100
 			
 		best_value = options_for_synset[0][2]
@@ -282,7 +289,7 @@ def propagate_list(my_wn, seed_list_file, relations_file, log_file, out_file, se
 			else: final_pol = 'neutral'
 			
 		if log != None:
-			print >> log, '	Final_pol:', final_pol, best_value
+			print >> log, '	Final_pol:', final_pol.decode('utf-8'), best_value
 			print >> log, '	' + '**' * 100
 			print >> log, '	' + '**' * 100
 			
@@ -312,7 +319,7 @@ def propagate_list(my_wn, seed_list_file, relations_file, log_file, out_file, se
 
 	
 	for synset, pos, pol, value, lemmas in data:
-		print >> f, synset + ';' + pos + ';' + pol + ';' + str(value / maxim) + ';' + lemmas + ';-1'
+		print >> f, synset.decode('utf-8') + ';' + pos.decode('utf-8') + ';' + pol.decode('utf-8') + ';' + str(value / maxim) + ';' + lemmas.decode('utf-8') + ';-1'
 	f.close()
 			
 	logging.debug('Output in file ' + out_file)
@@ -388,43 +395,55 @@ def evaluate(system_out, gold_standard):
 	# # Load the gold
 	results = {}
    	gold = {}
+   	pos_for_synset = {}
+   	all_poses = set()
    	for polarity, synset, pos in gold_standard:
    		gold[synset] = polarity
+   		pos_for_synset[synset] = pos
+   		all_poses.add(pos)
 
 	for synset_gold, polarity_gold in gold.items():
+		'''
+		pos = pos_for_synset[synset]
+		
+		if (polarity_gold,pos) not in results:
+			results[(polarity_gold,pos)] = (0, 0, 0, 0)
+
+		polarity_system = system_out.get(synset_gold)
+		
+		total, ok, wrong, none = results[(polarity_gold,pos)]
+		if polarity_system is None:
+			results[(polarity_gold,pos)] = (total + 1, ok, wrong, none + 1)
+		elif polarity_system == polarity_gold:  # # OK!!
+			results[(polarity_gold,pos)] = (total + 1, ok + 1, wrong, none)
+		else:
+			results[(polarity_gold,pos)] = (total + 1, ok, wrong + 1, none)
+		'''
 		if polarity_gold not in results:
 			results[polarity_gold] = (0, 0, 0, 0)
 
 		polarity_system = system_out.get(synset_gold)
 		
-		# #Uncomment next line to get all the outputs of the system
-		# print synset_gold,polarity_gold,polarity_system
-
 		total, ok, wrong, none = results[polarity_gold]
-		if polarity_system is None:
+		if polarity_system is None: 
 			results[polarity_gold] = (total + 1, ok, wrong, none + 1)
 		elif polarity_system == polarity_gold:  # # OK!!
 			results[polarity_gold] = (total + 1, ok + 1, wrong, none)
 		else:
 			results[polarity_gold] = (total + 1, ok, wrong + 1, none)
-	# End for
-	
-	# # Printing results
-	total = sum(total for (total, _, _, _) in results.values())
-	ok = sum(ok for (_, ok, _, _) in results.values())
-	wr = sum(wr for (_, _, wr, _) in results.values())
-	print_results(total, ok, wr)
-		
-	for polarity, (total, ok, wrong, none) in results.items():
-		print '  ', polarity
-		print_results(total, ok, wrong, '    ')
-	print
+
 	return results
 
 def print_results(total, ok, wrong, sep=''):
-	prec = ok * 100.0 / (ok + wrong)
-	rec = ok * 100.0 / total
-	f1 = 2 * prec * rec / (prec + rec)
+	if (ok + wrong) == 0: prec = 0
+	else:prec = ok * 100.0 / (ok + wrong)
+	
+	if total==0: rec=0
+	else: rec = ok * 100.0 / total
+	
+	if (prec+rec) == 0: f1=0
+	else: f1 = 2 * prec * rec / (prec + rec)
+	
 	none = total - ok - wrong
 	print sep + 'Total: %d\tOk:%d\tWrong:%d\tNone:%d' % (total, ok, wrong, none)
 	print sep + 'Precision: %3.2f' % prec
@@ -434,6 +453,7 @@ def print_results(total, ok, wrong, sep=''):
 
 def show_results(results):
 	overall_results = {}
+	
 	for n, result_fold in enumerate(results):
 		print '######## Evaluation of the fold', n, '#########'
 		overall_total = sum(total for (total, _, _, _) in result_fold.values())
@@ -558,7 +578,7 @@ if __name__ == '__main__':
 			logging.debug('Output file:' + output_file.name)
 			logging.debug('len out ' + str(len(system_out)))
 			
-			if False:  # Mapping synsets to lemmas for do lemma-based evaluation
+			if True:  # Mapping synsets to lemmas for do lemma-based evaluation
 				list_test = map_gold_to_lemma(list_test,my_wn)  # Mapping to lemma
 				system_out = map_system_to_lemma(system_out)
 

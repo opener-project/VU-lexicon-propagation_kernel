@@ -32,8 +32,10 @@ can contain 2 types of lines:'''
 		sys.exit(-1)
 		
 		
+	lang = sys.argv[1]
+
 	verbose = False
-	if len(sys.argv)==2:
+	if False and len(sys.argv)==2:
 		if sys.argv[1]=='-verbose':
 			verbose = True
 		else:
@@ -48,7 +50,7 @@ can contain 2 types of lines:'''
 	my_lexicon = etree.Element('Lexicon')
 	my_lexicon.set('languageCoding','UTF-8')
 	my_lexicon.set('label','sentiment')
-	my_lexicon.set('language',"-")
+	my_lexicon.set('language',lang)
 
 	my_root.append(my_lexicon)
 	n=0
